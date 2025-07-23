@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -27,6 +28,8 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-	fmt.Println("🚀 Servidor iniciado na porta " + port + "...")
-	http.ListenAndServe(":"+port, handler)
+	fmt.Println("Servidor iniciado na porta " + port + "...")
+	if err := http.ListenAndServe(":"+port, handler); err != nil {
+		log.Fatal(err)
+	}
 }
