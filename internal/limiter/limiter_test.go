@@ -1,6 +1,7 @@
 package limiter
 
 import (
+	"context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/joho/godotenv"
+	"github.com/stretchr/testify/require"
 
 	"github.com/aserafim/desafio_rate_limiter/internal/config"
 	"github.com/aserafim/desafio_rate_limiter/internal/limiter/strategy"
@@ -17,12 +19,18 @@ func init() {
 	_ = godotenv.Load("../.env")
 }
 
+func flushRedis(t *testing.T, rdb *redis.Client) {
+	err := rdb.FlushAll(context.Background()).Err()
+	require.NoError(t, err)
+}
+
 func TestRateLimiterByIP(t *testing.T) {
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",
 		DB:       0,
 	})
+	flushRedis(t, rdb)
 
 	cfg := &config.Config{
 		RateLimitIP:        2,
@@ -68,6 +76,7 @@ func TestRateLimiterByToken(t *testing.T) {
 		Password: "",
 		DB:       0,
 	})
+	flushRedis(t, rdb)
 
 	cfg := &config.Config{
 		RateLimitIP:        0, // Not used in this test
@@ -118,6 +127,7 @@ func TestTokenOverridesIP(t *testing.T) {
 		Password: "",
 		DB:       0,
 	})
+	flushRedis(t, rdb)
 
 	cfg := &config.Config{
 		RateLimitIP:        1,
